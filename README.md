@@ -12,7 +12,11 @@ This project attempts to create a number of tools for using the [Transport API](
       - [`api.getFromATCO(ATCO)`](#apigetfromatcoatco)
         - [Example](#example)
         - [Output](#output)
+      - [`api.getFromTIPLOCCRS(TIPLOCCRS)`](#apigetfromtiploccrstiploccrs)
+        - [Example](#example-1)
+        - [Output](#output-1)
       - [`api.busCreate(dict)`](#apibuscreatedict)
+      - [`api.bus.simplist` structure](#apibussimplist-structure)
 
 ## Initialisation
 
@@ -99,13 +103,90 @@ pprint.pprint(response)
  'stop_name': 'Stone Cross'}
 ```
 
+#### `api.getFromTIPLOCCRS(TIPLOCCRS)`
+
+Accepts a TIPLOC or CRS Code (which must be of type `str`), creates an HTTP `GET` request to the Transport API providing the defined TIPLOC/CRS code (and App ID and Key), gets the `json` formatted response and converts it into a Python `dict`.
+
+##### Example
+
+```python
+import api, pprint
+
+response=api.getFromTIPLOCCRS('sgb')
+
+pprint.pprint(response)
+```
+
+##### Output
+
+```python
+{'date': '2020-05-23',
+ 'departures': {'all': [{'aimed_arrival_time': '18:43',  
+                         'aimed_departure_time': '18:43',
+                         'aimed_pass_time': None,
+                         'best_arrival_estimate_mins': 5,
+                         'best_departure_estimate_mins': 5,
+                         'category': 'OO',
+                         'destination_name': 'Kidderminster',
+                         'expected_arrival_time': '19:40',
+                         'expected_departure_time': '19:40',
+                         'mode': 'train',
+                         'operator': 'LM',
+                         'operator_name': 'West Midlands Trains',
+                         'origin_name': 'Dorridge',
+                         'platform': '1',
+                         'service': '12257320',
+                         'service_timetable': {'id': 'https://transportapi.com/v3/uk/train/service/train_uid:C15528/2020-05-23/timetable.json?app_id=4857f2ca&app_key=30b1a0323b7f225c74ec4a541707e9ba&darwin=true&live=true'},
+                         'source': 'Network Rail',
+                         'status': 'LATE',
+                         'train_uid': 'C15528'},
+                        {'aimed_arrival_time': '19:02',
+                         'aimed_departure_time': '19:03',
+                         'aimed_pass_time': None,
+                         'best_arrival_estimate_mins': 0,
+                         'best_departure_estimate_mins': 1,
+                         'category': 'OO',
+                         'destination_name': 'Worcester Shrub Hill',
+                         'expected_arrival_time': '19:35',
+                         'expected_departure_time': '19:36',
+                         'mode': 'train',
+                         'operator': 'LM',
+                         'operator_name': 'West Midlands Trains',
+                         'origin_name': 'Dorridge',
+                         'platform': '1',
+                         'service': '12257320',
+                         'service_timetable': {'id': 'https://transportapi.com/v3/uk/train/service/train_uid:C17003/2020-05-23/timetable.json?app_id=4857f2ca&app_key=30b1a0323b7f225c74ec4a541707e9ba&darwin=true&live=true'},
+                         'source': 'Network Rail',
+                         'status': 'LATE',
+                         'train_uid': 'C17003'},
+ 'request_time': '2020-05-23T19:34:08+01:00',
+ 'station_code': 'sgb',
+ 'station_name': 'Smethwick Galton Bridge (Low Level)',
+ 'time_of_day': '19:34'}
+```
+
+**Note:** Results redacted after 2<sup>nd</sup> element to avoid an unecessarily long code block, a maximum of 10 results are returned by Transport API.
+
 #### `api.busCreate(dict)`
 
 Instantiates an object of class `bus`. The `bus` class contains four objects:
 
-|Object|Description|
-|---|---|
-|`list`|Equivalent to the slice `['departures']['all']` performed on the specified `dict` in the arguments (this `dict` should be that returned by `api.getFromATCO`).|
-|`number`||
-|`operator`||
-|`simplist`||
+| Object     | Description                                                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list`     | Equivalent to the slice `['departures']['all']` performed on the specified `dict` in the arguments (this `dict` should be that returned by `api.getFromATCO`). |
+| `number`   | Result of `len(list)`                                                                                                                                          |
+| `operator` | Returns the set of all elements given by the iterative slice `[i]['operator name']` on `list` (i.e. returns all unique bus operators).                         |
+| `simplist` | Returns a simplified version of `list` containing the following mapping listed below                                                                           |
+
+#### `api.bus.simplist` structure
+
+```python
+{"service": list[i]["line_name"],
+"destination": list[i]["direction"],
+"date": list[i]["date"],
+"time": list[i]["best_departure_estimate"],
+"estimated": due,
+"cancel": list[i]["status"]["cancellation"]["value"]}
+```
+
+Where `due` is the ceiling function performed on the seconds portion of the difference between the `datetime` representation of the bus' best estimate of departure time and the current time.
