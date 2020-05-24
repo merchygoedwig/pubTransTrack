@@ -77,3 +77,32 @@ def busCreate(dict):
             buselem=bus(line,destination,arrival,eta,cancel)
             buslist.append(buselem)
     return buslist
+
+# Creation of the train class and a function to create a list of objects of class train. Each "train" holds seven elements: arrival (a datetime.datetime showing estimated arrival time); eta (an int showing estimated time of arrival in minutes); operator (a str holding the long name of the TOC); destination (a str showing the train's terminus station); origin (a str showing the train's origin station); status (a str showing the current status of the train, i.e. "ON TIME") and uid (a str showing the UID of the train imported from TRUST).
+class train:
+    def __init__(self,arrival,eta,operator,destination,origin,status,uid):
+        self.arrival = arrival
+        self.eta = eta
+        self.operator = operator
+        self.destination = destination
+        self.origin = origin
+        self.status = status
+        self.uid = uid
+
+def trainCreate(dict):
+    trainlist = []
+    timestamp=dict['request_time']
+    date=timestamp.split('T')[0]
+    cflist = dict['departures']['all']
+    num = len(cflist)
+    for i in range(num):
+        arrival = datetime.strptime(date+cflist[i]['expected_departure_time'],'%Y-%m-%d%H:%M')
+        eta = cflist[i]['best_departure_estimate_mins']
+        operator = cflist[i]['operator_name']
+        destination = cflist[i]['destination_name']
+        origin = cflist[i]['origin_name']
+        status = cflist[i]['status']
+        uid = cflist[i]['train_uid']
+        trainelem=train(arrival,eta,operator,destination,origin,status,uid)
+        trainlist.append(trainelem)
+    return trainlist
