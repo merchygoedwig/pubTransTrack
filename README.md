@@ -16,7 +16,6 @@ This project attempts to create a number of tools for using the [Transport API](
         - [Example](#example-1)
         - [Output](#output-1)
       - [`api.busCreate(dict)`](#apibuscreatedict)
-      - [`api.bus.simplist` structure](#apibussimplist-structure)
 
 ## Initialisation
 
@@ -169,26 +168,13 @@ pprint.pprint(response)
 
 #### `api.busCreate(dict)`
 
-*Ignore this section until this comment is removed, this function has changed, documentation will be written, but in the meantime, refer to the comments in `__init__.py` in `api`.*
+Returns a list, the elements of which are of class `bus`, with data taken from the dict returned from `api.getFromATCO(ATCO)`. The `bus` class contains five objects:
 
-Instantiates an object of class `bus`. The `bus` class contains four objects:
 
-| Object     | Description                                                                                                                                                    |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `list`     | Equivalent to the slice `['departures']['all']` performed on the specified `dict` in the arguments (this `dict` should be that returned by `api.getFromATCO`). |
-| `number`   | Result of `len(list)`                                                                                                                                          |
-| `operator` | Returns the set of all elements given by the iterative slice `[i]['operator name']` on `list` (i.e. returns all unique bus operators).                         |
-| `simplist` | Returns a simplified version of `list` containing the following mapping listed below                                                                           |
-
-#### `api.bus.simplist` structure
-
-```python
-{"service": list[i]["line_name"],
-"destination": list[i]["direction"],
-"date": list[i]["date"],
-"time": list[i]["best_departure_estimate"],
-"estimated": due,
-"cancel": list[i]["status"]["cancellation"]["value"]}
-```
-
-Where `due` is the ceiling function performed on the seconds portion of the difference between the `datetime` representation of the bus' best estimate of departure time and the current time.
+| Object        | Type                 | Definition                                                                                                                    |
+| ------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `line`        | `str`                | The line "number" for the corresponding bus, i.e. "40" or "the mickleover".                                                   |
+| `destination` | `str`                | The terminus for the corresponding bus, i.e. "Wednesbury, Wednesbury Bus Station" or "Derby".                                 |
+| `arrival`     | `datetime.datetime`  | The best estimate of the arrival time for the bus.                                                                            |
+| `eta`         | `datetime.timedelta` | The difference in time between the best estimate for the arrival time of the bus and the current time.                        |
+| `cancel`      | `bool`               | `True` or `False` depending on whether the bus has been cancelled or not. If data is not available, this defaults to `False`. |
