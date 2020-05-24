@@ -16,6 +16,7 @@ This project attempts to create a number of tools for using the [Transport API](
         - [Example](#example-1)
         - [Output](#output-1)
       - [`api.busCreate(dict)`](#apibuscreatedict)
+      - [`api.trainCreate(dict)`](#apitraincreatedict)
 
 ## Initialisation
 
@@ -28,7 +29,8 @@ To use the tools in this project, it is necessary to initialise the `apidata.jso
         "appkey": "Your App Key"
     },
     "default_settings": {
-        "default_ATCO": "Insert an ATCO Code Here"
+        "default_ATCO": "Insert an ATCO Code Here",
+        "default_TIPLOCCRS": "Insert a TIPLOC or CRS Code Here"
     }
 }
 ```
@@ -55,7 +57,7 @@ pprint.pprint(response)
 
 ##### Output
 
-**Note:** Results redacted after 2<sup>nd</sup> element to avoid an unecessarily long code block, a maximum of 10 results are returned by Transport API.
+**Note:** Results redacted after 2<sup>nd</sup> element to avoid an unnecessarily long code block, a maximum of 10 results are returned by Transport API.
 
 ```python
 {'atcocode': '43000983403',
@@ -164,7 +166,7 @@ pprint.pprint(response)
  'time_of_day': '19:34'}
 ```
 
-**Note:** Results redacted after 2<sup>nd</sup> element to avoid an unecessarily long code block, a maximum of 10 results are returned by Transport API.
+**Note:** Results redacted after 2<sup>nd</sup> element to avoid an unnecessarily long code block, a maximum of 10 results are returned by Transport API.
 
 #### `api.busCreate(dict)`
 
@@ -178,3 +180,17 @@ Returns a list, the elements of which are of class `bus`, with data taken from t
 | `arrival`     | `datetime.datetime`  | The best estimate of the arrival time for the bus.                                                                            |
 | `eta`         | `datetime.timedelta` | The difference in time between the best estimate for the arrival time of the bus and the current time.                        |
 | `cancel`      | `bool`               | `True` or `False` depending on whether the bus has been cancelled or not. If data is not available, this defaults to `False`. |
+
+#### `api.trainCreate(dict)`
+
+Returns a list, the elements of which are of class `train`, with the data taken form the dict returned from `api.getFromTIPLOCCRS(TIPLOCCRS)`. The `train` class contains seven objects:
+
+| Object        | Type                | Definition                                                            |
+| ------------- | ------------------- | --------------------------------------------------------------------- |
+| `arrival`     | `datetime.datetime` | The best estimate of the arrival time for the train.                  |
+| `eta`         | `int`               | An `int` with minutes until the train arrives.                        |
+| `operator`    | `str`               | The TOC operating the train.                                          |
+| `destination` | `str`               | The terminus station for the train.                                   |
+| `origin`      | `str`               | The origin station for the train.                                     |
+| `status`      | `str`               | A short description of the train's current status provided by Darwin. |
+| `uid`         | `str`               | The UID of the train as provided in TRUST.                            |
