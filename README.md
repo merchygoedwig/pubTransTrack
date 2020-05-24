@@ -169,6 +169,8 @@ pprint.pprint(response)
 
 #### `api.busCreate(dict)`
 
+*Ignore this section until this comment is removed, this function has changed, documentation will be written, but in the meantime, refer to the comments in `__init__.py` in `api`.*
+
 Instantiates an object of class `bus`. The `bus` class contains four objects:
 
 | Object     | Description                                                                                                                                                    |
