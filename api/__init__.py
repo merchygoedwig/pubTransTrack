@@ -43,44 +43,37 @@ def getFromTIPLOCCRS(TIPLOCCRS):
         data = json.loads(url.read().decode())
     return(data)
 
-# Creation of the bus class and a function to instantiate it and fill it with the required objects, the objects held in bus are: list (the slice of the dict returned previously accessed by somevar['departures']['all']); number (the number of elements in list); operator (a set of the list returned by iteration over the slice list[i]['operator name']) and simplist (a simplified version of list containing a dict with elements with keys "service", "destination", "date", "time", "estimated" and "cancel").
+# Creation of the bus class and a function to create a list of objects of class bus. Each bus holds five elements: line (a string of the bus route 'number'), destination (a string of the terminus of the bus), arrival (a datetime.datetime of the best estimate of arrival time), eta (a datetime.timedelta of the time between the arrival and the current time) and cancel (a bool showing if the bus has been cancelled).
 class bus:
-    def __init__(self,list,number,operator,simplist):
-        self.list=list
-        self.number=number
-        self.operator=operator
-        self.simplist=simplist
+    def __init__(self,line,destination,arrival,eta,cancel):
+        self.line = line
+        self.destination = destination
+        self.arrival = arrival
+        self.eta = eta
+        self.cancel = cancel
 
 def busCreate(dict):
-    number=len(dict['departures']['all'])
-    list=dict['departures']['all']
-    operator=[]
-    simplist = []
-    for i in range(number):
-        operator.append(list[i]['operator_name'])
-        duetime=datetime.strptime(list[i]["date"]+list[i]["best_departure_estimate"],'%Y-%m-%d%H:%M')
-        now=datetime.now()
-        due=duetime-now
-        due=math.ceil(due.seconds/60)
-        try:
-            simplist.append(
-                {"service": list[i]["line_name"],
-                "destination": list[i]["direction"],
-                "date": list[i]["date"],
-                "time": list[i]["best_departure_estimate"],
-                "estimated": due,
-                "cancel": list[i]["status"]["cancellation"]["value"]}
-            )
-        except NameError:
-            simplist.append(
-                {"service": list[i]["line_name"],
-                "destination": list[i]["direction"],
-                "date": list[i]["date"],
-                "time": list[i]["best_departure_estimate"],
-                "estimated": due,
-                "cancel": False})
-    operator=set(operator)
+    buslist = []
+    cflist = dict['departures']['all']
+    num = len(cflist)
+    now = datetime.now()
+    try:
+        for i in range(num):
+            line = cflist[i]["line_name"]
+            destination = cflist[i]["direction"]
+            arrival = datetime.strptime(cflist[i]["date"]+cflist[i]["best_departure_estimate"],'%Y-%m-%d%H:%M')
+            eta = arrival - now
+            cancel = cflist[i]["status"]["cancellation"]["value"]
+            buselem=bus(line,destination,arrival,eta,cancel)
+            buslist.append(buselem)
 
-    out=bus(list,number,operator,simplist)
-    return out
-                
+    except NameError:
+        for i in range(num):
+            line = cflist[i]["line_name"]
+            destination = cflist[i]["direction"]
+            arrival = datetime.strptime(cflist[i]["date"]+cflist[i]["best_departure_estimate"],'%Y-%m-%d%H:%M')
+            eta = arrival - now
+            cancel = False
+            buselem=bus(line,destination,arrival,eta,cancel)
+            buslist.append(buselem)
+    return buslist
