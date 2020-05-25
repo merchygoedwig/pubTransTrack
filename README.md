@@ -6,7 +6,7 @@ This project attempts to create a number of tools for using the [Transport API](
 
 - [PubTransTrack](#pubtranstrack)
   - [About](#about)
-  - [Initialisation](#initialisation)
+  - [Initialisationbus=api.busCreate(busdata)bus=api.busCreate(busdata)](#initialisationbusapibuscreatebusdatabusapibuscreatebusdata)
   - [`api` module](#api-module)
     - [Functions and classes](#functions-and-classes)
       - [`api.getFromATCO(ATCO)`](#apigetfromatcoatco)
@@ -18,7 +18,7 @@ This project attempts to create a number of tools for using the [Transport API](
       - [`api.busCreate(dict)`](#apibuscreatedict)
       - [`api.trainCreate(dict)`](#apitraincreatedict)
 
-## Initialisation
+## Initialisationbus=api.busCreate(busdata)bus=api.busCreate(busdata)
 
 To use the tools in this project, it is necessary to initialise the `apidata.json` file that the `api` package can read settings from. You can find your `appid` and `appkey` from your Transport API dashboard (provided you have signed up, of course). The `default_ATCO` parameter is used as a failover when an ATCO Code is not provided. You can set this to any valid ATCO code, an example of which is `43000983403`. Create a file called `apidata.json` in the main directory of the project with the following contents:
 
