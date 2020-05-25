@@ -8,4 +8,10 @@ bus=api.busCreate(busdata)
 for i in range(len(bus)):
     print(str(i+1)+': '+bus[i].line+' to '+bus[i].destination+' is due in '+str(divmod(bus[i].eta.seconds,60)[0])+' min(s)')
 
-traindata=api.getFromTIPLOCCRS(api.progvars.default_)
+print('\n')
+
+traindata=api.getFromTIPLOCCRS(api.progvars.default_TIPLOCCRS)
+train=api.trainCreate(traindata)
+
+for i in range(len(train)):
+    print(str(i+1)+': '+train[i].arrival.strftime("%H:%M ")+train[i].operator+' service to '+train[i].destination+' is due in '+str(train[i].eta)+' min(s). This service is currently '+train[i].status)
