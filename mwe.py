@@ -1,8 +1,9 @@
 # The following is provided as a minimum working example of the api package provided in this project.
 
 import api
+import time
 
-busdata=api.getFromATCO(api.progvars.default_ATCO)
+busdata=api.getFromATCO("43000983403")
 bus=api.busCreate(busdata)
 
 for i in range(len(bus)):
@@ -15,3 +16,6 @@ train=api.trainCreate(traindata)
 
 for i in range(len(train)):
     print(str(i+1)+': '+train[i].arrival.strftime("%H:%M ")+train[i].operator+' service to '+train[i].destination+' is due in '+str(train[i].eta)+' min(s). This service is currently '+train[i].status)
+
+busList = api.getLineFromArgs("TNXB","40","outbound","43000983403")
+
