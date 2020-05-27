@@ -21,11 +21,11 @@ def initialise():
     return out
 
 # Instantiation of an initialsettings class
+global progvars
 progvars=initialise()
 
 # Function to make an GET request to the REST API asking for departures for a given ATCO Code, passing in App ID and Key using a the previously instantiated progvars (which is of the initialsettings class), which is declared global, this returns a nested Python dict
 def getFromATCO(ATCO):
-    global progvars
     if type(ATCO)!=str:
         ATCO=progvars.default_ATCO
     with urllib.request.urlopen("https://transportapi.com/v3/uk/bus/stop/"+ATCO+"/live.json?app_id="+progvars.appid+"&app_key="+progvars.appkey+"&group=no&nextbuses=yes") as url:
@@ -34,7 +34,6 @@ def getFromATCO(ATCO):
 
 # Function to make an GET request to the REST API asking for departures for a given TIPLOC or CRS Code, passing in App ID and Key using a the previously instantiated progvars (which is of the initialsettings class), which is declared global, this returns a nested Python dict
 def getFromTIPLOCCRS(TIPLOCCRS):
-    global progvars
     if type(TIPLOCCRS)!=str:
         TIPLOCCRS=progvars.default_TIPLOCCRS
     trainurl=['https://transportapi.com/v3/uk/train/station/',TIPLOCCRS,'/live.json?app_id=',progvars.appid,'&app_key=',progvars.appkey,'&darwin=true&train_status=passenger']
@@ -77,6 +76,55 @@ def busCreate(dict):
             buselem=bus(line,destination,arrival,eta,cancel)
             buslist.append(buselem)
     return buslist
+#Class and function for holding timetable (scheduled) bus information. Each element on the busStop class is described in the documentation. The function is defined and takes in the values as seen, also accepting kwargs. The function can accept any kwarg, but the code checks for keys "time" and "date", if they are not provided, the variables of those names are set to an empty string (""). A HTTP GET is then performed with the defined args. The json file is loaded using json.loads and is dumped as a native Python dict. A list of class busStop is then created from the loaded json dump. Also included is the conversion of the date and time elements to a native Python datetime object under the "timestamp" element.
+class busStop:
+    def __init__(self,time,date,atcocode,name,stop_name,smscode,locality,
+    bearing,indicator,latitude,longitude,timestamp):
+        self.time = time
+        self.date = date
+        self.atcocode = atcocode
+        self.name = name
+        self.stop_name = stop_name
+        self.smscode = smscode
+        self.locality = locality
+        self.bearing = bearing
+        self.indicator = indicator
+        self.latitude = latitude
+        self.longitude = longitude
+        self.timestamp = timestamp
+    
+def getLineFromArgs(operator,line,direction,atcocode=progvars.default_ATCO,**kwargs):
+    checkdict = dict()
+    
+    for i in range(len(kwargs)):
+        checkdict[list(kwargs.keys())[i]] = kwargs.get(list(kwargs.keys())[i])
+    
+    variables=["date","time"]
+    #datetimeFormat=["%Y-%m-%d","%H:%M"]
+
+    for i in range(len(variables)):
+        if variables[i] not in checkdict:
+            #checkdict[variables[i]] = datetime.strftime(datetime.now(),datetimeFormat[i])
+            checkdict[variables[i]] = ""
+
+    date = checkdict["date"]
+    time = checkdict["time"]
+
+    lineurl = ['https://transportapi.com/v3/uk/bus/route/',operator,'/',line,'/',direction,'/',atcocode,'/',date,'/',time,'/timetable.json?app_id=',progvars.appid,'&app_key=',progvars.appkey,'&edge_geometry=false&stops=all']
+    lineurl=''.join(lineurl)
+    
+    with urllib.request.urlopen(lineurl) as url:
+        data = json.loads(url.read().decode())
+    
+    busStopList = []
+    stops=data['stops']
+
+    for i in range(len(stops)):
+        busStopList.append(busStop(stops[i]["time"], stops[i]["date"], stops[i]["atcocode"], stops[i]["name"], stops[i]["stop_name"], stops[i]["smscode"], stops[i]["locality"], stops[i]["bearing"], stops[i]["indicator"], stops[i]["latitude"], stops[i]["longitude"],
+        datetime.strptime(stops[i]["date"]+stops[i]["time"],"%Y-%m-%d%H:%M")
+        ))
+
+    return busStopList
 
 # Creation of the train class and a function to create a list of objects of class train. Each "train" holds seven elements: arrival (a datetime.datetime showing estimated arrival time); eta (an int showing estimated time of arrival in minutes); operator (a str holding the long name of the TOC); destination (a str showing the train's terminus station); origin (a str showing the train's origin station); status (a str showing the current status of the train, i.e. "ON TIME") and uid (a str showing the UID of the train imported from TRUST).
 class train:
